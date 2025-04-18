@@ -1,0 +1,35 @@
+
+services:
+  app:
+    build: .
+    container_name: test-task-app
+    restart: on-failure
+    ports: 
+      - 8080:6060 
+    environment: 
+    - CONFIG_PATH=config/local.yaml
+    - JWT_SECRET=shtbljwhebjwheblwerjhnmla
+    depends_on:
+      - database
+    networks:
+        - ps
+
+  database:
+    image: postgres:latest
+    container_name: bdpostgres
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment: 
+      - POSTGRES_DB=testdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    # volumes: 
+    #   - ./data:/var/lib/postgresql/data
+    networks:
+      - ps
+networks:
+  ps:
+
+      
+      
+

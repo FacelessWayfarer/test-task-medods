@@ -1,0 +1,11 @@
+postgresql:
+  host: bdpostgres
+  port: "5432"
+  username: postgres
+  password: postgres
+  database: testdb
+http:
+  ip: 0.0.0.0
+  port: 6060
+  readtimeout: 3s
+  writetimeout: 5s
