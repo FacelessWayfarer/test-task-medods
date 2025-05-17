@@ -26,34 +26,40 @@ func (maker *JWTMaker) CreateToken(userid uuid.UUID, ip string, duration time.Du
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-	tokenString, err := token.SignedString([]byte(maker.privateKey))
 
+	tokenString, err := token.SignedString([]byte(maker.privateKey))
 	if err != nil {
 		return "", nil, err
 	}
 
 	return tokenString, claims, nil
 }
-func CreateRefreshTokenHash(refreshToken string) []byte {
+func (maker *JWTMaker) CreateRefreshTokenHash(refreshToken string) []byte {
 	refreshTokenArray := sha256.Sum256([]byte(refreshToken))
+
 	refreshTokenHash := refreshTokenArray[:]
+
 	return refreshTokenHash
 }
 
 func (maker *JWTMaker) VerifyToken(tokenString string) (*UserClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+
 		_, ok := t.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
 			return nil, fmt.Errorf("error parsing token")
 		}
+
 		return []byte(maker.privateKey), nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("invalid token")
+		return nil, fmt.Errorf("invalid token: %w", err)
 	}
+
 	claims, ok := token.Claims.(*UserClaims)
 	if !ok {
 		return nil, fmt.Errorf("invalid token")
 	}
+
 	return claims, nil
 }

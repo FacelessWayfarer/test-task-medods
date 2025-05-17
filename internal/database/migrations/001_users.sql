@@ -17,21 +17,11 @@ SET log_error_verbosity = VERBOSE;
 
 
 CREATE TABLE users (
-    id UUID PRIMARY KEY NOT NULL,
-    email TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    id UUID PRIMARY KEY,
+    email TEXT CHECK (LENGTH(email) <= 50) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL
 );
-
-INSERT INTO users (id, email, created_at, updated_at)
-VALUES ('1716daab-5868-477e-9f51-0df2a0e925b7'::uuid,'sjy1nmkmals2ldia9wnnla@gmail.com',to_timestamp(1744813161),to_timestamp(1744813161));
-
-
-INSERT INTO users (id, email, created_at, updated_at)
-VALUES ('655b8db4-0a6e-4dd8-82c7-49112ec15a29'::uuid,'252ynq3o5qozmawnnla@mail.ru',to_timestamp(1744815890),to_timestamp(1744815890));
-
-INSERT INTO users (id, email, created_at, updated_at)
-VALUES ('bdaff134-3b88-4596-86e2-4c55e106b77e'::uuid,'kasuuaklqozmawnnla@mail.ru',to_timestamp(1744815896),to_timestamp(1744815897));
 
 COMMIT;
 
@@ -40,6 +30,10 @@ COMMIT;
 -- +goose Down
 -- +goose StatementBegin
 SELECT 'down SQL query';
--- +goose StatementEnd
+BEGIN;
+
+DROP TABLE users;
 
 COMMIT;
+-- +goose StatementEnd
+

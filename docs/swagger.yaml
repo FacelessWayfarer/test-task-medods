@@ -1,0 +1,105 @@
+basePath: /
+definitions:
+  handlers.GenResponse:
+    properties:
+      AccessToken:
+        type: string
+      AccessTokenExpiresAt:
+        type: string
+      RefreshToken:
+        type: string
+      RefreshTokenExpiresAt:
+        type: string
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  handlers.RefreshResponse:
+    properties:
+      AccessToken:
+        type: string
+      AccessTokenExpiresAt:
+        type: string
+      RefreshToken:
+        type: string
+      RefreshTokenExpiresAt:
+        type: string
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  handlers.RefreshTokensReq:
+    properties:
+      AccessToken:
+        type: string
+      Encoded_refresh_token:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a test task
+  title: Test task API
+  version: "1.0"
+paths:
+  /tokens/:
+    post:
+      consumes:
+      - application/json
+      description: Refreshes access and refresh tokens
+      parameters:
+      - description: access and refresh tokens
+        in: body
+        name: tokens
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RefreshTokensReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.RefreshResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: RefreshTokens
+      tags:
+      - Tokens
+  /tokens/{user_id}:
+    get:
+      consumes:
+      - application/json
+      description: Generates access and refresh tokens
+      parameters:
+      - description: user_id
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: GenerateTokens
+      tags:
+      - Tokens
+swagger: "2.0"

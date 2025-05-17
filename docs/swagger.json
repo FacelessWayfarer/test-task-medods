@@ -1,0 +1,161 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a test task",
+        "title": "Test task API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/tokens/": {
+            "post": {
+                "description": "Refreshes access and refresh tokens",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tokens"
+                ],
+                "summary": "RefreshTokens",
+                "parameters": [
+                    {
+                        "description": "access and refresh tokens",
+                        "name": "tokens",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RefreshTokensReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RefreshResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/tokens/{user_id}": {
+            "get": {
+                "description": "Generates access and refresh tokens",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tokens"
+                ],
+                "summary": "GenerateTokens",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.GenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handlers.GenResponse": {
+            "type": "object",
+            "properties": {
+                "AccessToken": {
+                    "type": "string"
+                },
+                "AccessTokenExpiresAt": {
+                    "type": "string"
+                },
+                "RefreshToken": {
+                    "type": "string"
+                },
+                "RefreshTokenExpiresAt": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.RefreshResponse": {
+            "type": "object",
+            "properties": {
+                "AccessToken": {
+                    "type": "string"
+                },
+                "AccessTokenExpiresAt": {
+                    "type": "string"
+                },
+                "RefreshToken": {
+                    "type": "string"
+                },
+                "RefreshTokenExpiresAt": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.RefreshTokensReq": {
+            "type": "object",
+            "properties": {
+                "AccessToken": {
+                    "type": "string"
+                },
+                "Encoded_refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

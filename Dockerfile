@@ -8,12 +8,18 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o ./bin/app cmd/app/main.go
+# Download install swag
+RUN go install github.com/swaggo/swag/cmd/swag@latest
 
-FROM alpine AS runner
+# Build swagger using swag
+RUN swag init -d cmd --pdl 3
+
+RUN go build -o ./bin/app cmd/main.go
+
+FROM alpine:latest AS runner
 
 #Curl is used for testing
-RUN apk --no-cache add curl 
+RUN apk --no-cache add curl
 
 #Copy bin
 COPY --from=builder /src/app/bin/app /
@@ -21,10 +27,11 @@ COPY --from=builder /src/app/bin/app /
 #Copy config
 COPY config/local.yaml config/local.yaml
 
-#Copy .env file env vars may be used here
-#COPY .env /
+#Copy swagger
+COPY docs docs
 
 #Copy migrations
 COPY internal/database/migrations internal/database/migrations
 
 CMD [ "/app" ]
+

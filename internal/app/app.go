@@ -3,24 +3,39 @@ package app
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/FacelessWayfarer/test-task-medods/internal/config"
-	database "github.com/FacelessWayfarer/test-task-medods/internal/database/postgres"
-	tokengenerator "github.com/FacelessWayfarer/test-task-medods/internal/handlers/token-generator"
-	tokenrefresher "github.com/FacelessWayfarer/test-task-medods/internal/handlers/token-refresher"
-
-	"github.com/go-chi/chi/v5"
+	"github.com/FacelessWayfarer/test-task-medods/internal/database"
+	"github.com/FacelessWayfarer/test-task-medods/internal/routes"
 )
 
-func NewHTTPServer(ctx context.Context, cfg *config.Conifg) *http.Server {
-	Storage := database.Init(cfg)
+func Run() error {
+	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			log.Println(context.Background(), panicErr)
+		}
+	}()
 
-	router := chi.NewRouter()
+	cfg := config.SetConfig()
 
-	router.Get("/{user_id}", tokengenerator.New(ctx, Storage, Storage))
+	ctx := context.Background()
 
-	router.Post("/", tokenrefresher.New(ctx, Storage, Storage))
+	log.Println("Running Application")
+	
+	Server := newHTTPServer(ctx, cfg)
+	if err := Server.ListenAndServe(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func newHTTPServer(ctx context.Context, cfg *config.Conifg) *http.Server {
+	storage := database.New(cfg)
+
+	router := routes.New(ctx, storage)
 
 	return &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", cfg.HTTP.IP, cfg.HTTP.Port),
