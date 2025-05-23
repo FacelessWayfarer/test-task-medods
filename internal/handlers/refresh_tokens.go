@@ -32,74 +32,91 @@ const (
 // @Success      200  {object}  RefreshResponse
 // @Failure      400  {object}  response.Response
 // @Router       /tokens/ [POST]
-func (h *Handler) RefreshTokens(ctx context.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		h.logger.Println("refreshing tokens")
+func (h *Handler) RefreshTokens(w http.ResponseWriter, r *http.Request) {
+	h.logger.Println("refreshing tokens")
 
-		req, err := decodeRefreshRequestBody(r.Body)
-		if err != nil {
-			h.logger.Printf("error checking request: %v", err)
+	ctx := r.Context()
 
-			render.JSON(w, r, response.Error("invalid request"))
+	req, err := decodeRefreshRequestBody(r.Body)
+	if err != nil {
+		h.logger.Printf("error checking request: %v", err)
 
-			return
-		}
+		w.WriteHeader(http.StatusBadRequest)
 
-		refreshClaims, session, err := h.verifyTokenAndFetchSession(ctx, req.Base64RefreshToken)
-		if err != nil {
-			render.JSON(w, r, response.Error("internal error"))
+		render.JSON(w, r, response.Error("invalid request"))
 
-			return
-		}
-
-		if err = h.checkExpiration(refreshClaims.ExpiresAt.Unix(), session.ExpiredAt.Unix()); err != nil {
-		}
-
-		stringIp := strings.Split(r.RemoteAddr, ":")
-
-		ip := stringIp[0]
-
-		user, err := h.getUserFromStorage(ctx, fmt.Sprint(refreshClaims.UserID))
-		if err != nil {
-			render.JSON(w, r, response.Error("internal error"))
-
-			return
-		}
-
-		if session.UserIp != ip {
-			if err = h.sendEmail(user.Email); err != nil {
-				render.JSON(w, r, response.Error("internal error"))
-
-				return
-			}
-		}
-
-		base64RefreshToken, refreshTokenExpiresAt, err := h.createAndSaveRefreshToken(ctx, user.ID, ip)
-		if err != nil {
-			render.JSON(w, r, response.Error("internal error"))
-
-			return
-		}
-
-		accessToken, accessTokenExpiresAt, err := h.createAccessToken(user.ID, ip)
-		if err != nil {
-			render.JSON(w, r, response.Error("internal error"))
-
-			return
-		}
-
-		h.logger.Println("successfully refreshed jwt access token")
-
-		w.Header().Set("Content-Type", "application/json")
-
-		render.JSON(w, r, RefreshResponse{
-			Response:              response.OK(),
-			AccessToken:           accessToken,
-			RefreshToken:          base64RefreshToken,
-			AccessTokenExpiresAt:  *accessTokenExpiresAt,
-			RefreshTokenExpiresAt: *refreshTokenExpiresAt,
-		})
+		return
 	}
+
+	refreshClaims, session, err := h.verifyTokenAndFetchSession(ctx, req.Base64RefreshToken)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+
+		render.JSON(w, r, response.Error("internal error"))
+
+		return
+	}
+
+	if err = h.checkExpiration(refreshClaims.ExpiresAt.Unix(), session.ExpiredAt.Unix()); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+
+		render.JSON(w, r, response.Error("invalid token"))
+
+		return
+	}
+
+	stringIp := strings.Split(r.RemoteAddr, ":")
+
+	ip := stringIp[0]
+
+	user, err := h.getUserFromStorage(ctx, fmt.Sprint(refreshClaims.UserID))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		render.JSON(w, r, response.Error("internal error"))
+
+		return
+	}
+
+	if session.UserIp != ip {
+		if err = h.sendEmail(user.Email); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+
+			render.JSON(w, r, response.Error("internal error"))
+
+			return
+		}
+	}
+
+	base64RefreshToken, refreshTokenExpiresAt, err := h.createAndSaveRefreshToken(ctx, user.ID, ip)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		render.JSON(w, r, response.Error("internal error"))
+
+		return
+	}
+
+	accessToken, accessTokenExpiresAt, err := h.createAccessToken(user.ID, ip)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		render.JSON(w, r, response.Error("internal error"))
+
+		return
+	}
+
+	h.logger.Println("successfully refreshed jwt access token")
+
+	w.Header().Set("Content-Type", "application/json")
+
+	render.JSON(w, r, RefreshResponse{
+		Response:              response.OK(),
+		AccessToken:           accessToken,
+		RefreshToken:          base64RefreshToken,
+		AccessTokenExpiresAt:  *accessTokenExpiresAt,
+		RefreshTokenExpiresAt: *refreshTokenExpiresAt,
+	})
 }
 
 func decodeRefreshRequestBody(body io.ReadCloser) (*RefreshTokensReq, error) {

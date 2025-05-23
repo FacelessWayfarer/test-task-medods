@@ -31,53 +31,63 @@ const (
 // @Success      200  {object}  GenResponse
 // @Failure      400  {object}  response.Response
 // @Router       /tokens/{user_id} [GET]
-func (h *Handler) GenerateTokens(ctx context.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		h.logger.Println("Generating jwt access and refresh tokens")
+func (h *Handler) GenerateTokens(w http.ResponseWriter, r *http.Request) {
+	h.logger.Println("Generating jwt access and refresh tokens")
 
-		userID, ip, err := checkRequest(*r)
-		if err != nil {
-			h.logger.Printf("error checking request: %v", err)
+	userID, ip, err := checkRequest(*r)
+	if err != nil {
+		h.logger.Printf("error checking request: %v", err)
 
-			render.JSON(w, r, response.Error("invalid request"))
+		w.WriteHeader(http.StatusBadRequest)
 
-			return
-		}
+		render.JSON(w, r, response.Error("invalid request"))
 
-		user, err := h.getUserFromStorage(ctx, userID)
-		if err != nil {
-			render.JSON(w, r, response.Error("user not found"))
-
-			return
-		}
-
-		base64RefreshToken, refreshTokenExpiresAt, err := h.createAndSaveRefreshToken(ctx, user.ID, ip)
-		if err != nil {
-			render.JSON(w, r, response.Error("internal error"))
-
-			return
-		}
-
-		accessToken, accessTokenExpiresAt, err := h.createAccessToken(user.ID, ip)
-		if err != nil {
-			render.JSON(w, r, response.Error("internal error"))
-
-			return
-		}
-
-		h.logger.Println("Successfully generated and saved jwt access and refresh tokens")
-
-		w.Header().Set("Content-Type", "application/json")
-
-		render.JSON(w, r, GenResponse{
-			Response:              response.OK(),
-			AccessToken:           accessToken,
-			RefreshToken:          base64RefreshToken,
-			AccessTokenExpiresAt:  *accessTokenExpiresAt,
-			RefreshTokenExpiresAt: *refreshTokenExpiresAt,
-		})
+		return
 	}
+
+	ctx := r.Context()
+
+	user, err := h.getUserFromStorage(ctx, userID)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+
+		render.JSON(w, r, response.Error("user not found"))
+
+		return
+	}
+
+	base64RefreshToken, refreshTokenExpiresAt, err := h.createAndSaveRefreshToken(ctx, user.ID, ip)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		render.JSON(w, r, response.Error("internal error"))
+
+		return
+	}
+
+	accessToken, accessTokenExpiresAt, err := h.createAccessToken(user.ID, ip)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		render.JSON(w, r, response.Error("internal error"))
+
+		return
+	}
+
+	h.logger.Println("Successfully generated and saved jwt access and refresh tokens")
+
+	w.Header().Set("Content-Type", "application/json")
+
+	render.JSON(w, r, GenResponse{
+		Response:              response.OK(),
+		AccessToken:           accessToken,
+		RefreshToken:          base64RefreshToken,
+		AccessTokenExpiresAt:  *accessTokenExpiresAt,
+		RefreshTokenExpiresAt: *refreshTokenExpiresAt,
+	})
+
 }
+
 func checkRequest(r http.Request) (string, string, error) {
 	userID := chi.URLParam(&r, "user_id")
 	if userID == "" {

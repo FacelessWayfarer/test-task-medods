@@ -20,11 +20,9 @@ func Run() error {
 
 	cfg := config.SetConfig()
 
-	ctx := context.Background()
-
 	log.Println("Running Application")
-	
-	Server := newHTTPServer(ctx, cfg)
+
+	Server := newHTTPServer(cfg)
 	if err := Server.ListenAndServe(); err != nil {
 		return err
 	}
@@ -32,10 +30,10 @@ func Run() error {
 	return nil
 }
 
-func newHTTPServer(ctx context.Context, cfg *config.Conifg) *http.Server {
+func newHTTPServer(cfg *config.Conifg) *http.Server {
 	storage := database.New(cfg)
 
-	router := routes.New(ctx, storage)
+	router := routes.New(storage)
 
 	return &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", cfg.HTTP.IP, cfg.HTTP.Port),

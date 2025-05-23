@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"os"
 
 	"github.com/go-chi/chi/v5"
@@ -16,7 +15,7 @@ import (
 // JWT is created with secret string that is stored in ENV variable
 const secretEnv = "JWT_SECRET"
 
-func New(ctx context.Context, storage *database.Database) *chi.Mux {
+func New(storage *database.Database) *chi.Mux {
 	router := chi.NewRouter()
 
 	secretString := os.Getenv(secretEnv)
@@ -29,9 +28,9 @@ func New(ctx context.Context, storage *database.Database) *chi.Mux {
 		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition
 	))
 
-	router.Get("/tokens/{user_id}", handler.GenerateTokens(ctx))
+	router.Get("/tokens/{user_id}", handler.GenerateTokens)
 
-	router.Post("/tokens/", handler.RefreshTokens(ctx))
+	router.Post("/tokens/", handler.RefreshTokens)
 
 	return router
 }

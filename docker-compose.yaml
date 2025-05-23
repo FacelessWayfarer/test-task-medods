@@ -27,6 +27,15 @@ services:
     #   - ./data:/var/lib/postgresql/data
     networks:
       - ps
+
+  tests:
+    build: tests
+    container_name: test-task-tests
+    restart: on-failure
+    depends_on:
+      - app
+    networks:
+      - ps
 networks:
   ps:
 

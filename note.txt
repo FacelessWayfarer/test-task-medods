@@ -1,0 +1,5 @@
+http://localhost:8080/swagger/index.html
+docker-compose up --build -d
+
+FROM golang:1.24-alpine AS runner
+
