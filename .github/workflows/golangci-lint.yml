@@ -1,0 +1,28 @@
+name: golangci-lint
+on:
+  push:
+    branches: [ maister ]
+  pull_request:
+    branches: [ maister ]
+
+permissions:
+  contents: read
+
+jobs:
+  golangci:
+    name: test-task-medods
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          working-directory: .
+          version: latest
+
