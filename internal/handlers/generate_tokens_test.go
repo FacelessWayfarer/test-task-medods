@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -96,8 +95,6 @@ func TestHandler_GenerateTokens(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			h.GenerateTokens(w, r)
-
-			fmt.Println(w.Body.String())
 
 			resp := w.Result()
 			if resp.StatusCode != tt.expectedStatusCode {
