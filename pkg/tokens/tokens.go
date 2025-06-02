@@ -44,7 +44,6 @@ func (maker *JWTMaker) CreateRefreshTokenHash(refreshToken string) []byte {
 
 func (maker *JWTMaker) VerifyToken(tokenString string) (*UserClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(t *jwt.Token) (interface{}, error) {
-
 		_, ok := t.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
 			return nil, fmt.Errorf("error parsing token")

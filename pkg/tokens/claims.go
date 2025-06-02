@@ -19,7 +19,6 @@ type UserClaims struct {
 func NewUserClaims(id uuid.UUID, ip string, duration time.Duration) (*UserClaims, error) {
 	tokenID, err := uuid.NewRandom()
 	if err != nil {
-
 		log.Printf("error generating tokenID: %e", err)
 
 		return nil, errors.New("internal error")

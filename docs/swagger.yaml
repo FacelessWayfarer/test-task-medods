@@ -1,5 +1,10 @@
 basePath: /
 definitions:
+  handlers.GenErrResponse:
+    properties:
+      Error:
+        type: string
+    type: object
   handlers.GenResponse:
     properties:
       AccessToken:
@@ -10,9 +15,10 @@ definitions:
         type: string
       RefreshTokenExpiresAt:
         type: string
-      error:
-        type: string
-      status:
+    type: object
+  handlers.RefreshErrResponse:
+    properties:
+      Error:
         type: string
     type: object
   handlers.RefreshResponse:
@@ -25,23 +31,12 @@ definitions:
         type: string
       RefreshTokenExpiresAt:
         type: string
-      error:
-        type: string
-      status:
-        type: string
     type: object
-  handlers.RefreshTokensReq:
+  handlers.RefreshTokensRequest:
     properties:
       AccessToken:
         type: string
-      Encoded_refresh_token:
-        type: string
-    type: object
-  response.Response:
-    properties:
-      error:
-        type: string
-      status:
+      Base64RefreshToken:
         type: string
     type: object
 host: localhost:8080
@@ -62,7 +57,7 @@ paths:
         name: tokens
         required: true
         schema:
-          $ref: '#/definitions/handlers.RefreshTokensReq'
+          $ref: '#/definitions/handlers.RefreshTokensRequest'
       produces:
       - application/json
       responses:
@@ -73,7 +68,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/handlers.RefreshErrResponse'
       summary: RefreshTokens
       tags:
       - Tokens
@@ -86,7 +81,6 @@ paths:
       - description: user_id
         in: path
         name: user_id
-        required: true
         type: string
       produces:
       - application/json
@@ -98,8 +92,8 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Response'
-      summary: GenerateTokens
+            $ref: '#/definitions/handlers.GenErrResponse'
+      summary: GetTokens
       tags:
       - Tokens
 swagger: "2.0"

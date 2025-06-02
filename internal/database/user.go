@@ -8,7 +8,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/FacelessWayfarer/test-task-medods/internal/models"
+	"github.com/FacelessWayfarer/test-task-medods/internal/service/models"
 )
 
 func (db *Database) GetUser(ctx context.Context, userID string) (*models.User, error) {
@@ -20,7 +20,6 @@ func (db *Database) GetUser(ctx context.Context, userID string) (*models.User, e
 
 	if err := row.Scan(&user.ID, &user.Email, &user.CreatedAt, &user.UpdatedAt); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-
 			return nil, models.ErrUserNotFound
 		}
 

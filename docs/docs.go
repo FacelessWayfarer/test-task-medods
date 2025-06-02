@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.RefreshTokensReq"
+                            "$ref": "#/definitions/handlers.RefreshTokensRequest"
                         }
                     }
                 ],
@@ -49,7 +49,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/handlers.RefreshErrResponse"
                         }
                     }
                 }
@@ -67,14 +67,13 @@ const docTemplate = `{
                 "tags": [
                     "Tokens"
                 ],
-                "summary": "GenerateTokens",
+                "summary": "GetTokens",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "user_id",
                         "name": "user_id",
-                        "in": "path",
-                        "required": true
+                        "in": "path"
                     }
                 ],
                 "responses": {
@@ -87,7 +86,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/handlers.GenErrResponse"
                         }
                     }
                 }
@@ -95,6 +94,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.GenErrResponse": {
+            "type": "object",
+            "properties": {
+                "Error": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.GenResponse": {
             "type": "object",
             "properties": {
@@ -109,11 +116,13 @@ const docTemplate = `{
                 },
                 "RefreshTokenExpiresAt": {
                     "type": "string"
-                },
-                "error": {
-                    "type": "string"
-                },
-                "status": {
+                }
+            }
+        },
+        "handlers.RefreshErrResponse": {
+            "type": "object",
+            "properties": {
+                "Error": {
                     "type": "string"
                 }
             }
@@ -132,33 +141,16 @@ const docTemplate = `{
                 },
                 "RefreshTokenExpiresAt": {
                     "type": "string"
-                },
-                "error": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
                 }
             }
         },
-        "handlers.RefreshTokensReq": {
+        "handlers.RefreshTokensRequest": {
             "type": "object",
             "properties": {
                 "AccessToken": {
                     "type": "string"
                 },
-                "Encoded_refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "response.Response": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                },
-                "status": {
+                "Base64RefreshToken": {
                     "type": "string"
                 }
             }

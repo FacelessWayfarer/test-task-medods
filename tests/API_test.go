@@ -16,8 +16,7 @@ func TestApi_HappyPath(t *testing.T) {
 	time.Sleep(1 * time.Second)
 	u := url.URL{
 		Scheme: "http",
-
-		Host: host,
+		Host:   host,
 	}
 	e := httpexpect.Default(t, u.String())
 
@@ -25,6 +24,7 @@ func TestApi_HappyPath(t *testing.T) {
 		WithPath("user_id", "1716daab-5868-477e-9f51-0df2a0e925b7").
 		Expect().
 		Status(200).
-		JSON().Object().
+		JSON().
+		Object().
 		ContainsKey("RefreshToken")
 }

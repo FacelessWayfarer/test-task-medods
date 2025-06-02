@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"testing"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/FacelessWayfarer/test-task-medods/internal/models"
+	"github.com/FacelessWayfarer/test-task-medods/internal/service/models"
 )
 
 func TestDatabase_GetUser(t *testing.T) {
@@ -35,7 +36,7 @@ func TestDatabase_GetUser(t *testing.T) {
 	}
 	tests := []testCase{
 		{
-			name: "Happy path",
+			name: "Happy_path",
 			mockUser: models.User{
 				ID:        uuid.New(),
 				Email:     "email",
@@ -49,10 +50,9 @@ func TestDatabase_GetUser(t *testing.T) {
 
 				mock.ExpectQuery("SELECT id").WithArgs(fmt.Sprint(tt.mockUser.ID)).
 					WillReturnRows(rows)
-
 			},
 		}, {
-			name: "Error user not found",
+			name: "Error_user_not_found",
 			mockUser: models.User{
 				ID: uuid.New(),
 			},
@@ -60,13 +60,11 @@ func TestDatabase_GetUser(t *testing.T) {
 			mockSetup: func(tt testCase) {
 				mock.ExpectQuery("SELECT id").WithArgs(fmt.Sprint(tt.mockUser.ID)).
 					WillReturnError(sql.ErrNoRows)
-
 			},
 		},
 	}
 
 	for _, tt := range tests {
-
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mockSetup(tt)
 

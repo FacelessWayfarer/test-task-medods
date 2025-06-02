@@ -9,18 +9,18 @@ import (
 	"fmt"
 	"testing"
 	"time"
-	
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/FacelessWayfarer/test-task-medods/internal/models"
+	"github.com/FacelessWayfarer/test-task-medods/internal/service/models"
 )
 
 // Define a custom type Any to match any value to pass as args in Mock methods
 type Any struct{}
 
-func (a Any) Match(v driver.Value) bool {
+func (a Any) Match(_ driver.Value) bool {
 	return true
 }
 
@@ -44,11 +44,11 @@ func TestDatabase_SaveSession(t *testing.T) {
 	}
 	tests := []testCase{
 		{
-			name: "Happy path",
+			name: "Happy_path",
 			mockSession: models.Session{
 				ID:           uuid.New(),
-				UserId:       uuid.New(),
-				UserIp:       "ip",
+				UserID:       uuid.New(),
+				UserIP:       "ip",
 				RefreshToken: "token",
 				CreatedAt:    time.Now(),
 				ExpiredAt:    time.Now().Add(time.Hour),
@@ -57,8 +57,8 @@ func TestDatabase_SaveSession(t *testing.T) {
 			mockSetup: func(tt testCase) {
 				mock.ExpectExec("INSERT INTO sessions").
 					WithArgs(tt.mockSession.ID,
-						tt.mockSession.UserId,
-						tt.mockSession.UserIp,
+						tt.mockSession.UserID,
+						tt.mockSession.UserIP,
 						base64.StdEncoding.EncodeToString([]byte(tt.mockSession.RefreshToken)),
 						Any{},
 						Any{}).
@@ -103,11 +103,11 @@ func TestDatabase_GetSession(t *testing.T) {
 	}
 	tests := []testCase{
 		{
-			name: "Happy path",
+			name: "Happy_path",
 			mockSession: models.Session{
 				ID:           uuid.New(),
-				UserId:       uuid.New(),
-				UserIp:       "ip",
+				UserID:       uuid.New(),
+				UserIP:       "ip",
 				RefreshToken: "token",
 				CreatedAt:    time.Now(),
 				ExpiredAt:    time.Now().Add(time.Hour),
@@ -116,8 +116,8 @@ func TestDatabase_GetSession(t *testing.T) {
 			mockSetup: func(tt testCase) {
 				rows := sqlmock.NewRows([]string{"id", "user_id", "user_ip", "refresh_token", "created_at", "expired_at"}).
 					AddRow(tt.mockSession.ID,
-						tt.mockSession.UserId,
-						tt.mockSession.UserIp,
+						tt.mockSession.UserID,
+						tt.mockSession.UserIP,
 						tt.mockSession.RefreshToken,
 						tt.mockSession.CreatedAt,
 						tt.mockSession.ExpiredAt,
@@ -125,11 +125,10 @@ func TestDatabase_GetSession(t *testing.T) {
 
 				mock.ExpectQuery("SELECT id").WithArgs(fmt.Sprint(tt.mockSession.ID)).
 					WillReturnRows(rows)
-
 			},
 		},
 		{
-			name: "Error session not found",
+			name: "Error_session not found",
 			mockSession: models.Session{
 				ID: uuid.New(),
 			},
@@ -137,7 +136,6 @@ func TestDatabase_GetSession(t *testing.T) {
 			mockSetup: func(tt testCase) {
 				mock.ExpectQuery("SELECT id").WithArgs(fmt.Sprint(tt.mockSession.ID)).
 					WillReturnError(sql.ErrNoRows)
-
 			},
 		},
 	}

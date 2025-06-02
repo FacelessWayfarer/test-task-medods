@@ -40,7 +40,6 @@ func SetConfig() *Conifg {
 	}
 
 	if err := cleanenv.ReadConfig(configPath, Cfg); err != nil {
-
 		var headerText = "test task"
 
 		errText, _ := cleanenv.GetDescription(Cfg, &headerText)
