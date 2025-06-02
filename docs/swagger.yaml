@@ -1,4 +1,3 @@
-basePath: /
 definitions:
   handlers.GenErrResponse:
     properties:
@@ -39,12 +38,8 @@ definitions:
       Base64RefreshToken:
         type: string
     type: object
-host: localhost:8080
 info:
   contact: {}
-  description: This is a test task
-  title: Test task API
-  version: "1.0"
 paths:
   /tokens/:
     post:
@@ -69,6 +64,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/handlers.RefreshErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.RefreshErrResponse'
       summary: RefreshTokens
       tags:
       - Tokens
@@ -91,6 +90,10 @@ paths:
             $ref: '#/definitions/handlers.GenResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.GenErrResponse'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/handlers.GenErrResponse'
       summary: GetTokens

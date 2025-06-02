@@ -10,6 +10,12 @@ import (
 	"github.com/FacelessWayfarer/test-task-medods/internal/service"
 )
 
+// New -.
+// @title           Test task API
+// @version         1.0
+// @description     This is a test task
+// @host      localhost:8080
+// @BasePath  /
 func New(storage *database.Database) *chi.Mux {
 	router := chi.NewRouter()
 
