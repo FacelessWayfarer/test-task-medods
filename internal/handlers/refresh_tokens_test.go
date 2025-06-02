@@ -16,7 +16,7 @@ import (
 	"github.com/FacelessWayfarer/test-task-medods/internal/service/models"
 )
 
-func TestService_RefreshTokens(t *testing.T) {
+func TestHandler_RefreshTokens(t *testing.T) {
 	type testCase struct {
 		name               string
 		ctx                context.Context
