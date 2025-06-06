@@ -1,4 +1,4 @@
-package database
+package storage
 
 import (
 	"context"
@@ -11,12 +11,12 @@ import (
 	"github.com/FacelessWayfarer/test-task-medods/internal/service/models"
 )
 
-func (db *Database) GetUser(ctx context.Context, userID string) (*models.User, error) {
+func (s *Storage) GetUser(ctx context.Context, userID string) (*models.User, error) {
 	const mark = "database.GetUser"
 
 	var user models.User
 
-	row := db.DB.QueryRowContext(ctx, `SELECT id, email, created_at, updated_at FROM users WHERE id = $1;`, userID)
+	row := s.db.QueryRowContext(ctx, `SELECT id, email, created_at, updated_at FROM users WHERE id = $1;`, userID)
 
 	if err := row.Scan(&user.ID, &user.Email, &user.CreatedAt, &user.UpdatedAt); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

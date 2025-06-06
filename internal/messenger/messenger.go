@@ -1,9 +1,16 @@
 package messenger
 
+type IMessenger interface {
+	SendEmail(string) error
+}
+
 type Messenger struct {
 }
 
-func (m *Messenger) SendEmail(msg string) error {
-	_ = msg
+func New() *Messenger {
+	return &Messenger{}
+}
+
+func (m *Messenger) SendEmail(string) error {
 	return nil
 }

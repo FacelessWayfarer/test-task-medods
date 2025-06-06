@@ -55,7 +55,6 @@ linters:
     - gosimple
     - staticcheck
     - unused
-    - revive
     - stylecheck
     - gosec
     - unconvert
@@ -86,7 +85,6 @@ linters:
     - mnd
     - nestif
     - predeclared
-    - testpackage
     - nolintlint
     - noctx
     - tparallel

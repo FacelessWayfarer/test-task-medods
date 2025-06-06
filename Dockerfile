@@ -31,7 +31,7 @@ COPY config/local.yaml config/local.yaml
 COPY docs docs
 
 #Copy migrations
-COPY internal/database/migrations internal/database/migrations
+COPY internal/migrations internal/migrations
 
 CMD [ "/app" ]
 

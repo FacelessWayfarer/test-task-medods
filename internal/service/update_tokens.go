@@ -22,7 +22,7 @@ func (s *Service) UpdateTokens(ctx context.Context, req models.TokensToRefresh, 
 		return nil, err
 	}
 
-	if err = s.checkExpiration(refreshClaims.ExpiresAt.Unix(), session.ExpiredAt.Unix()); err != nil {
+	if err = s.verifyExpiration(refreshClaims.ExpiresAt.Unix(), session.ExpiredAt.Unix()); err != nil {
 		return nil, err
 	}
 
@@ -96,14 +96,10 @@ func (s *Service) verifyTokenAndFetchSession(ctx context.Context, req models.Tok
 func (s *Service) sendEmail(userEmail string) error {
 	s.logger.Printf("user ip changed, sending email to: %v", userEmail)
 
-	if err := s.emailSender.SendEmail(userEmail); err != nil {
-		return fmt.Errorf("could not send email: %v", err)
-	}
-
-	return nil
+	return s.emailSender.SendEmail(userEmail)
 }
 
-func (s *Service) checkExpiration(time1 int64, time2 int64) error {
+func (s *Service) verifyExpiration(time1 int64, time2 int64) error {
 	if time1 < time.Now().Unix() || time2 < time.Now().Unix() {
 		s.logger.Println("token expired")
 

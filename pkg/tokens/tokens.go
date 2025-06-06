@@ -9,6 +9,12 @@ import (
 	"github.com/google/uuid"
 )
 
+type IJWTMaker interface {
+	CreateToken(userid uuid.UUID, ip string, duration time.Duration) (string, *UserClaims, error)
+	CreateRefreshTokenHash(refreshToken string) []byte
+	VerifyToken(tokenString string) (*UserClaims, error)
+}
+
 type JWTMaker struct {
 	privateKey string
 }

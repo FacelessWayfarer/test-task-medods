@@ -1,4 +1,4 @@
-package database
+package storage //nolint:testpackage
 
 import (
 	"context"
@@ -26,7 +26,7 @@ func TestDatabase_GetUser(t *testing.T) {
 
 	defer db.Close()
 
-	storage := &Database{DB: db}
+	storage := &Storage{db: db}
 
 	type testCase struct {
 		name      string

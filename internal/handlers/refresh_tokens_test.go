@@ -1,4 +1,4 @@
-package handlers
+package handlers //nolint:testpackage
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ func TestHandler_RefreshTokens(t *testing.T) {
 		name               string
 		ctx                context.Context
 		IP                 string
-		input              models.TokensToRefresh
+		input              RefreshTokensRequest
 		output             *models.RefreshedTokens
 		mockError          error
 		expectedStatusCode int
@@ -32,7 +32,7 @@ func TestHandler_RefreshTokens(t *testing.T) {
 			name: "Happy_path",
 			ctx:  context.Background(),
 			IP:   "111.111.111.111",
-			input: models.TokensToRefresh{AccessToken: "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJUb2tlbklEIjoiMjE1OGZlYjEtZTVkYS00MjNjLThmZWYtNDQ1ODNhYzVjNGFmIiwiVXNlcklEIjoiMTcxNmRhYWItNTg2OC00NzdlLTlmNTEtMGRmMmEwZTkyNWI3IiwiVXNlcklQIjoiMTcyLjE4LjAuMSIsImV4cCI6MTc0NzkyMzcxMCwiaWF0IjoxNzQ3OTIzNjUwfQ.Sn4tSHBBPvalKiU23ib1lImvPEdWNQrTYqshUYoSFXxKnLm2xGLXWJej0t6D2N8SZImd6Lv8PJBs1aTAuNNBxQ",
+			input: RefreshTokensRequest{AccessToken: "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJUb2tlbklEIjoiMjE1OGZlYjEtZTVkYS00MjNjLThmZWYtNDQ1ODNhYzVjNGFmIiwiVXNlcklEIjoiMTcxNmRhYWItNTg2OC00NzdlLTlmNTEtMGRmMmEwZTkyNWI3IiwiVXNlcklQIjoiMTcyLjE4LjAuMSIsImV4cCI6MTc0NzkyMzcxMCwiaWF0IjoxNzQ3OTIzNjUwfQ.Sn4tSHBBPvalKiU23ib1lImvPEdWNQrTYqshUYoSFXxKnLm2xGLXWJej0t6D2N8SZImd6Lv8PJBs1aTAuNNBxQ",
 				Base64RefreshToken: "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SlViMnRsYmtsRUlqb2lNamM0TVRnM09XSXRaR0UxTkMwME5ETTRMVGxqWmpndFlXRXpNREUzWW1RMVptRmlJaXdpVlhObGNrbEVJam9pTVRjeE5tUmhZV0l0TlRnMk9DMDBOemRsTFRsbU5URXRNR1JtTW1Fd1pUa3lOV0kzSWl3aVZYTmxja2xRSWpvaU1UY3lMakU0TGpBdU1TSXNJbVY0Y0NJNk1UYzBPREF4TURBMU1Dd2lhV0YwSWpveE56UTNPVEl6TmpVd2ZRLmdXMURRMXNoemN2aGloOUtVWUR0X0IteWpCTmNqVHhLVFVReW9xa1JRdU5aLW04QUtxTFM1eGpoZUVwalIzWDNzS21yNHlwZHR6U2FqbE9ia3lvWDd3"},
 			output: &models.RefreshedTokens{
 				AccessToken:           "access",
@@ -45,7 +45,9 @@ func TestHandler_RefreshTokens(t *testing.T) {
 			mockSetup: func(tt testCase) *Handler {
 				service := mocks.NewIService(t)
 
-				service.On("UpdateTokens", tt.ctx, tt.input, tt.IP).
+				req := RequestToRequest(tt.input)
+
+				service.On("UpdateTokens", tt.ctx, req, tt.IP).
 					Return(tt.output, tt.mockError)
 
 				return &Handler{
@@ -58,14 +60,16 @@ func TestHandler_RefreshTokens(t *testing.T) {
 			name: "token_expired",
 			ctx:  context.Background(),
 			IP:   "111.111.111.111",
-			input: models.TokensToRefresh{AccessToken: "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJUb2tlbklEIjoiMjE1OGZlYjEtZTVkYS00MjNjLThmZWYtNDQ1ODNhYzVjNGFmIiwiVXNlcklEIjoiMTcxNmRhYWItNTg2OC00NzdlLTlmNTEtMGRmMmEwZTkyNWI3IiwiVXNlcklQIjoiMTcyLjE4LjAuMSIsImV4cCI6MTc0NzkyMzcxMCwiaWF0IjoxNzQ3OTIzNjUwfQ.Sn4tSHBBPvalKiU23ib1lImvPEdWNQrTYqshUYoSFXxKnLm2xGLXWJej0t6D2N8SZImd6Lv8PJBs1aTAuNNBxQ",
+			input: RefreshTokensRequest{AccessToken: "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJUb2tlbklEIjoiMjE1OGZlYjEtZTVkYS00MjNjLThmZWYtNDQ1ODNhYzVjNGFmIiwiVXNlcklEIjoiMTcxNmRhYWItNTg2OC00NzdlLTlmNTEtMGRmMmEwZTkyNWI3IiwiVXNlcklQIjoiMTcyLjE4LjAuMSIsImV4cCI6MTc0NzkyMzcxMCwiaWF0IjoxNzQ3OTIzNjUwfQ.Sn4tSHBBPvalKiU23ib1lImvPEdWNQrTYqshUYoSFXxKnLm2xGLXWJej0t6D2N8SZImd6Lv8PJBs1aTAuNNBxQ",
 				Base64RefreshToken: "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SlViMnRsYmtsRUlqb2lNamM0TVRnM09XSXRaR0UxTkMwME5ETTRMVGxqWmpndFlXRXpNREUzWW1RMVptRmlJaXdpVlhObGNrbEVJam9pTVRjeE5tUmhZV0l0TlRnMk9DMDBOemRsTFRsbU5URXRNR1JtTW1Fd1pUa3lOV0kzSWl3aVZYTmxja2xRSWpvaU1UY3lMakU0TGpBdU1TSXNJbVY0Y0NJNk1UYzBPREF4TURBMU1Dd2lhV0YwSWpveE56UTNPVEl6TmpVd2ZRLmdXMURRMXNoemN2aGloOUtVWUR0X0IteWpCTmNqVHhLVFVReW9xa1JRdU5aLW04QUtxTFM1eGpoZUVwalIzWDNzS21yNHlwZHR6U2FqbE9ia3lvWDd3"},
 			mockError:          models.ErrTokenExpired,
 			expectedStatusCode: http.StatusInternalServerError,
 			mockSetup: func(tt testCase) *Handler {
 				service := mocks.NewIService(t)
 
-				service.On("UpdateTokens", tt.ctx, tt.input, tt.IP).
+				req := RequestToRequest(tt.input)
+
+				service.On("UpdateTokens", tt.ctx, req, tt.IP).
 					Return(tt.output, tt.mockError)
 
 				return &Handler{

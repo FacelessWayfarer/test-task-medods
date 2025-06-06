@@ -26,5 +26,5 @@ func TestApi_HappyPath(t *testing.T) {
 		Status(200).
 		JSON().
 		Object().
-		ContainsKey("RefreshToken")
+		ContainsKey("access_token")
 }

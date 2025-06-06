@@ -1,4 +1,4 @@
-package database
+package storage //nolint:testpackage
 
 import (
 	"context"
@@ -17,10 +17,10 @@ import (
 	"github.com/FacelessWayfarer/test-task-medods/internal/service/models"
 )
 
-// Define a custom type Any to match any value to pass as args in Mock methods
-type Any struct{}
+// Define a custom type AnyTime to match any value to pass as args in Mock methods
+type AnyTime struct{}
 
-func (a Any) Match(_ driver.Value) bool {
+func (a AnyTime) Match(_ driver.Value) bool {
 	return true
 }
 
@@ -34,7 +34,7 @@ func TestDatabase_SaveSession(t *testing.T) {
 
 	defer db.Close()
 
-	storage := &Database{DB: db}
+	storage := &Storage{db: db}
 
 	type testCase struct {
 		name        string
@@ -60,8 +60,8 @@ func TestDatabase_SaveSession(t *testing.T) {
 						tt.mockSession.UserID,
 						tt.mockSession.UserIP,
 						base64.StdEncoding.EncodeToString([]byte(tt.mockSession.RefreshToken)),
-						Any{},
-						Any{}).
+						AnyTime{},
+						AnyTime{}).
 					WillReturnResult(sqlmock.NewResult(1, 1)).
 					WillReturnError(tt.mockErr)
 			},
@@ -93,7 +93,7 @@ func TestDatabase_GetSession(t *testing.T) {
 
 	defer db.Close()
 
-	storage := &Database{DB: db}
+	storage := &Storage{db: db}
 
 	type testCase struct {
 		name        string

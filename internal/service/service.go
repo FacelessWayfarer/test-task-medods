@@ -2,17 +2,13 @@ package service
 
 import (
 	"context"
-	"log"
-	"os"
 
-	"github.com/FacelessWayfarer/test-task-medods/internal/database"
 	"github.com/FacelessWayfarer/test-task-medods/internal/messenger"
 	"github.com/FacelessWayfarer/test-task-medods/internal/service/models"
+	"github.com/FacelessWayfarer/test-task-medods/internal/storage"
+	"github.com/FacelessWayfarer/test-task-medods/pkg/logger"
 	"github.com/FacelessWayfarer/test-task-medods/pkg/tokens"
 )
-
-// JWT is created with secret string that is stored in ENV variable
-const secretEnv = "JWT_SECRET"
 
 //go:generate go run github.com/vektra/mockery/v2@latest --name=IService
 type IService interface {
@@ -28,16 +24,12 @@ type Service struct {
 	logger         Logger
 }
 
-func NewService(storage database.Database) *Service {
-	secretString := os.Getenv(secretEnv)
-
-	tokenCreator := tokens.NewJWT(secretString)
-
+func NewService(logger logger.Logger, storage storage.IStorage, tokenCreator tokens.IJWTMaker, messenger messenger.IMessenger) *Service {
 	return &Service{
-		userStorage:    &storage,
-		sessionStorage: &storage,
+		userStorage:    storage,
+		sessionStorage: storage,
 		tokenCreator:   tokenCreator,
-		emailSender:    &messenger.Messenger{},
-		logger:         log.New(os.Stdout, "test:", log.LstdFlags),
+		emailSender:    messenger,
+		logger:         logger,
 	}
 }

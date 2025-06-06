@@ -1,19 +1,24 @@
 package config
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
+
+	"github.com/FacelessWayfarer/test-task-medods/pkg/logger"
 )
+
+type IConfig interface {
+}
 
 type Conifg struct {
 	HTTP struct {
 		IP           string        `yaml:"ip" env:"HTTP-IP" env-required:"true"`
 		Port         int           `yaml:"port" env:"HTTP-PORT" env-required:"true"`
-		ReadTimeout  time.Duration `yaml:"readtimeout" env:"HTTP-READ-TIMEOUT" env-default:"3s"`
-		WriteTimeout time.Duration `yaml:"writetimeout" env:"HTTP-WRITE-TIMEOUT" env-default:"5s"`
+		ReadTimeout  time.Duration `yaml:"read_timeout" env:"HTTP-READ-TIMEOUT" env-default:"3s"`
+		WriteTimeout time.Duration `yaml:"write_timeout" env:"HTTP-WRITE-TIMEOUT" env-default:"5s"`
 	} `yaml:"http"`
 	PostgreSQL struct {
 		Username string `yaml:"username" env:"PSQL_USERNAME" env-required:"true"`
@@ -25,29 +30,27 @@ type Conifg struct {
 }
 
 const (
-	EnvConfigPathName = "CONFIG_PATH"
+	envConfigPathName = "CONFIG_PATH"
 )
 
-func SetConfig() *Conifg {
+func SetConfig(logger logger.Logger) (*Conifg, error) {
 	Cfg := &Conifg{}
 
-	log.Print("Initializing config")
+	logger.Println("Initializing config")
 
-	configPath := os.Getenv(EnvConfigPathName)
+	configPath := os.Getenv(envConfigPathName)
 
 	if configPath == "" {
-		log.Fatal("config path is required")
+		return nil, fmt.Errorf("config path is required")
 	}
 
 	if err := cleanenv.ReadConfig(configPath, Cfg); err != nil {
-		var headerText = "test task"
+		var headerText = "test_task"
 
 		errText, _ := cleanenv.GetDescription(Cfg, &headerText)
 
-		log.Print(errText)
-
-		log.Fatal(err)
+		return nil, fmt.Errorf("%v : %v", errText, err)
 	}
 
-	return Cfg
+	return Cfg, nil
 }

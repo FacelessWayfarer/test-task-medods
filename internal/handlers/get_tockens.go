@@ -1,13 +1,14 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
+
+const urlPathArg = "user_id"
 
 // ShowAccount godoc
 // @Summary      GetTokens
@@ -55,9 +56,9 @@ func (h *Handler) GetTokens(w http.ResponseWriter, r *http.Request) {
 }
 
 func checkRequest(r http.Request) (string, string, error) {
-	userID := chi.URLParam(&r, "user_id")
+	userID := chi.URLParam(&r, urlPathArg)
 	if userID == "" {
-		return "", "", errors.New("empty user_id")
+		return "", "", ErrEmptyUserID
 	}
 
 	stringIP := strings.Split(r.RemoteAddr, ":")

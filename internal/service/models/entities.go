@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// User is a struct representing "users" table in the database
 type User struct {
 	ID        uuid.UUID
 	Email     string
@@ -13,6 +14,7 @@ type User struct {
 	UpdatedAt time.Time
 }
 
+// Session is a struct representing "sessions" table in the database
 type Session struct {
 	ID           uuid.UUID
 	UserID       uuid.UUID
@@ -22,6 +24,7 @@ type Session struct {
 	ExpiredAt    time.Time
 }
 
+// GeneratedTokens is a response for a method GenerateTokens from service
 type GeneratedTokens struct {
 	AccessToken           string
 	RefreshToken          string
@@ -34,6 +37,7 @@ type TokensToRefresh struct {
 	Base64RefreshToken string
 }
 
+// RefreshedTokens is a response for a method UpdateTokens from service
 type RefreshedTokens struct {
 	AccessToken           string
 	RefreshToken          string

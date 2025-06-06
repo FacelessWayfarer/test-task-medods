@@ -2,12 +2,13 @@ package tokens
 
 import (
 	"errors"
-	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
+
+var ErrGeneratingTokenID = errors.New("internal error")
 
 type UserClaims struct {
 	TokenID uuid.UUID
@@ -19,9 +20,7 @@ type UserClaims struct {
 func NewUserClaims(id uuid.UUID, ip string, duration time.Duration) (*UserClaims, error) {
 	tokenID, err := uuid.NewRandom()
 	if err != nil {
-		log.Printf("error generating tokenID: %e", err)
-
-		return nil, errors.New("internal error")
+		return nil, ErrGeneratingTokenID
 	}
 
 	return &UserClaims{

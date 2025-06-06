@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -26,7 +26,7 @@ import (
 func (h *Handler) RefreshTokens(w http.ResponseWriter, r *http.Request) {
 	h.logger.Println("refreshing tokens")
 
-	ctx, IP, req, err := decodeRefreshRequestBody(*r)
+	IP, req, err := decodeRefreshRequestBody(*r)
 	if err != nil {
 		h.logger.Printf("error checking request: %v", err)
 
@@ -37,11 +37,22 @@ func (h *Handler) RefreshTokens(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.service.UpdateTokens(ctx, models.TokensToRefresh{
-		AccessToken:        req.AccessToken,
-		Base64RefreshToken: req.Base64RefreshToken,
-	}, IP)
+	ctx := r.Context()
+
+	request := RequestToRequest(*req)
+
+	resp, err := h.service.UpdateTokens(ctx, request, IP)
 	if err != nil {
+		if errors.Is(err, models.ErrTokenExpired) {
+			h.logger.Printf("error updating tokens: %v", err)
+
+			w.WriteHeader(http.StatusInternalServerError)
+
+			render.JSON(w, r, RefreshErrResponse{Error: ErrTokenExpired.Error()})
+
+			return
+		}
+
 		h.logger.Printf("error updating tokens: %v", err)
 
 		w.WriteHeader(http.StatusInternalServerError)
@@ -58,9 +69,7 @@ func (h *Handler) RefreshTokens(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, ToRefreshResponse(*resp))
 }
 
-func decodeRefreshRequestBody(r http.Request) (context.Context, string, *RefreshTokensRequest, error) {
-	ctx := r.Context()
-
+func decodeRefreshRequestBody(r http.Request) (string, *RefreshTokensRequest, error) {
 	stringIP := strings.Split(r.RemoteAddr, ":")
 
 	IP := stringIP[0]
@@ -68,8 +77,8 @@ func decodeRefreshRequestBody(r http.Request) (context.Context, string, *Refresh
 	var req RefreshTokensRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return context.Background(), "", nil, fmt.Errorf("could not decode request body: %v", err)
+		return "", nil, fmt.Errorf("could not decode request body: %v", err)
 	}
 
-	return ctx, IP, &req, nil
+	return IP, &req, nil
 }

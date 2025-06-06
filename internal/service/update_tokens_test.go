@@ -1,4 +1,4 @@
-package service
+package service //nolint:testpackage
 
 import (
 	"context"
